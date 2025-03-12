@@ -50,7 +50,7 @@ io.on("connection", (socket) => {
 
 // 🌍 Sunucuyu başlat
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, "0.0.0.0", () =>
-    console.log(`🚀 Server çalışıyor: http://${ip.address()}:${PORT}`)
+server.listen(PORT, () =>
+    console.log(`🚀 Server çalışıyor: Port ${PORT}`)
 );
 
