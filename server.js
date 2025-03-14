@@ -27,15 +27,23 @@ io.on("connection", (socket) => {
         activeUsers[userId] = { socketId: socket.id, groupId };
         console.log(`👤 Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
     });
+    
 
     // 📩 Kullanıcı mesaj gönderdiğinde
     socket.on("sendMessage", ({ groupId, message, senderId }) => {
         const timestamp = new Date().toISOString(); // Sunucu saati
-
-        // Gruba bağlı tüm istemcilere mesajı gönder
+    
+        console.log(`📩 Mesaj Alındı -> Grup: ${groupId}, Mesaj: ${message}, Gönderen: ${senderId}`);
+    
+        // 🔥 **Burada hata olabilir, grupta kaç kişi var bakalım**
+        const roomClients = io.sockets.adapter.rooms.get(groupId);
+        console.log(`👀 Grup ${groupId} içinde ${roomClients ? roomClients.size : 0} kullanıcı var.`);
+    
+        // **Mesajı yayına alalım**
         io.to(groupId).emit("receiveMessage", { message, senderId, groupId, timestamp });
-        console.log(`📩 Mesaj gönderildi -> ${message}`);
+        console.log(`📩 Mesaj yayınlandı: ${message} -> Grup ${groupId}`);
     });
+    
 
     // ❌ Kullanıcı bağlantıyı kestiğinde
     socket.on("disconnect", () => {
