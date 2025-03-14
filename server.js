@@ -30,21 +30,29 @@ io.on("connection", (socket) => {
     
 
     // 📩 Kullanıcı mesaj gönderdiğinde
-    socket.on("sendMessage", ({ groupId, message, senderId }) => {
-        const timestamp = new Date().toISOString(); // Sunucu saati
-    
-        console.log(`📩 Mesaj Alındı -> Grup: ${groupId}, Mesaj: ${message}, Gönderen: ${senderId}`);
-    
-        // 🔥 **Burada hata olabilir, grupta kaç kişi var bakalım**
-        const roomClients = io.sockets.adapter.rooms.get(groupId);
-        console.log(`👀 Grup ${groupId} içinde ${roomClients ? roomClients.size : 0} kullanıcı var.`);
-    
-        // **Mesajı yayına alalım**
-        io.to(groupId).emit("receiveMessage", { message, senderId, groupId, timestamp });
+// 📩 Kullanıcı mesaj gönderdiğinde
+socket.on("sendMessage", ({ groupId, message, senderId }) => {
+    const timestamp = new Date().toISOString(); // Sunucu saati
 
+    console.log(`📩 Mesaj Alındı -> Grup: ${groupId}, Mesaj: ${message}, Gönderen: ${senderId}`);
 
-        console.log(`📩 Mesaj yayınlandı: ${message} -> Grup ${groupId}`);
-    });
+    // 🔥 **Grubun içinde kaç kişi var kontrol edelim**
+    const roomClients = io.sockets.adapter.rooms.get(groupId);
+    console.log(`👀 Grup ${groupId} içinde ${roomClients ? roomClients.size : 0} kullanıcı var.`);
+
+    // 📩 **Mesajı JSON formatında düzgün bir şekilde yayına al**
+    const messageData = {
+        message: message,
+        senderId: senderId,
+        groupId: groupId,
+        timestamp: timestamp
+    };
+
+    io.to(groupId).emit("receiveMessage", messageData); // ❗ JSON.stringify KULLANMIYORUZ ❗
+
+    console.log(`📩 Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
+});
+
     
 
     // ❌ Kullanıcı bağlantıyı kestiğinde
