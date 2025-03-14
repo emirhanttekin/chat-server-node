@@ -40,7 +40,8 @@ io.on("connection", (socket) => {
         console.log(`👀 Grup ${groupId} içinde ${roomClients ? roomClients.size : 0} kullanıcı var.`);
     
         // **Mesajı yayına alalım**
-        io.to(groupId).emit("receiveMessage", JSON.stringify({ message, senderId, groupId, timestamp }));
+        io.to(groupId).emit("receiveMessage", { message, senderId, groupId, timestamp });
+
 
         console.log(`📩 Mesaj yayınlandı: ${message} -> Grup ${groupId}`);
     });
