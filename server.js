@@ -3,13 +3,13 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
-const ip = require('ip'); // IP adresini almak için
+const ip = require('ip'); 
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: "*", // 🔥 Tüm IP'lerden bağlantıyı kabul et (geliştirme için)
+        origin: "*", 
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -17,30 +17,28 @@ const io = socketIo(server, {
 
 let activeUsers = {};
 
-// 🔌 Kullanıcı Socket.IO'ya bağlandığında
-io.on("connection", (socket) => {
-    console.log("🔌 Yeni kullanıcı bağlandı:", socket.id);
 
-    // 👤 Kullanıcı bir gruba katıldığında
+io.on("connection", (socket) => {
+    console.log(" Yeni kullanıcı bağlandı:", socket.id);
+
+    
     socket.on("joinGroup", ({ userId, groupId }) => {
         socket.join(groupId);
         activeUsers[userId] = { socketId: socket.id, groupId };
-        console.log(`👤 Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
+        console.log(` Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
     });
     
 
-    // 📩 Kullanıcı mesaj gönderdiğinde
-// 📩 Kullanıcı mesaj gönderdiğinde
+
 socket.on("sendMessage", ({ groupId, message, senderId }) => {
-    const timestamp = new Date().toISOString(); // Sunucu saati
+    const timestamp = new Date().toISOString(); 
 
-    console.log(`📩 Mesaj Alındı -> Grup: ${groupId}, Mesaj: ${message}, Gönderen: ${senderId}`);
+    console.log(`Mesaj Alındı -> Grup: ${groupId}, Mesaj: ${message}, Gönderen: ${senderId}`);
 
-    // 🔥 **Grubun içinde kaç kişi var kontrol edelim**
     const roomClients = io.sockets.adapter.rooms.get(groupId);
-    console.log(`👀 Grup ${groupId} içinde ${roomClients ? roomClients.size : 0} kullanıcı var.`);
+    console.log(` Grup ${groupId} içinde ${roomClients ? roomClients.size : 0} kullanıcı var.`);
 
-    // 📩 **Mesajı JSON formatında düzgün bir şekilde yayına al**
+
     const messageData = {
         message: message,
         senderId: senderId,
@@ -48,27 +46,27 @@ socket.on("sendMessage", ({ groupId, message, senderId }) => {
         timestamp: timestamp
     };
 
-    io.to(groupId).emit("receiveMessage", messageData); // ❗ JSON.stringify KULLANMIYORUZ ❗
+    io.to(groupId).emit("receiveMessage", messageData); 
 
-    console.log(`📩 Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
+    console.log(` Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
 });
 
     
 
-    // ❌ Kullanıcı bağlantıyı kestiğinde
+  
     socket.on("disconnect", () => {
         Object.keys(activeUsers).forEach(userId => {
             if (activeUsers[userId].socketId === socket.id) {
                 delete activeUsers[userId];
             }
         });
-        console.log("❌ Kullanıcı bağlantıyı kesti:", socket.id);
+        console.log(" Kullanıcı bağlantıyı kesti:", socket.id);
     });
 });
 
-// 🌍 Sunucuyu başlat
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () =>
-    console.log(`🚀 Server çalışıyor: Port ${PORT}`)
+    console.log(` Server çalışıyor: Port ${PORT}`)
 );
 
