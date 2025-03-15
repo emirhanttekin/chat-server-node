@@ -42,7 +42,6 @@ socket.on("sendMessage", ({ groupId, message, senderId }) => {
     const messageData = {
         message: message,
         senderId: senderId,
-        senderName: senderName, 
         senderProfileImageUrl: senderProfileImageUrl, 
         groupId: groupId,
         timestamp: timestamp
