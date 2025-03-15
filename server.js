@@ -30,28 +30,27 @@ io.on("connection", (socket) => {
     
 
 
-socket.on("sendMessage", ({ groupId, message, senderId }) => {
-    const timestamp = new Date().toISOString(); 
-
-    console.log(`Mesaj Alındı -> Grup: ${groupId}, Mesaj: ${message}, Gönderen: ${senderId}`);
-
-    const roomClients = io.sockets.adapter.rooms.get(groupId);
-    console.log(` Grup ${groupId} içinde ${roomClients ? roomClients.size : 0} kullanıcı var.`);
-
-
-    const messageData = {
-        message: message,
-        senderId: senderId,
-        senderProfileImageUrl: senderProfileImageUrl, 
-        groupId: groupId,
-        timestamp: timestamp
-    };
-
-    io.to(groupId).emit("receiveMessage", messageData); 
-
-    console.log(` Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
-});
-
+    socket.on("sendMessage", ({ groupId, message, senderId, senderProfileImageUrl }) => {
+        const timestamp = new Date().toISOString(); 
+    
+        console.log(`Mesaj Alındı -> Grup: ${groupId}, Mesaj: ${message}, Gönderen: ${senderId}, Profil Resmi: ${senderProfileImageUrl}`);
+    
+        const roomClients = io.sockets.adapter.rooms.get(groupId);
+        console.log(` Grup ${groupId} içinde ${roomClients ? roomClients.size : 0} kullanıcı var.`);
+    
+        const messageData = {
+            message: message,
+            senderId: senderId,
+            senderProfileImageUrl: senderProfileImageUrl, // ✅ PROFİL RESMİ ARTIK DOĞRU ALINIYOR
+            groupId: groupId,
+            timestamp: timestamp
+        };
+    
+        io.to(groupId).emit("receiveMessage", messageData); 
+    
+        console.log(`✅ Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
+    });
+    
     
 
   
