@@ -3,13 +3,12 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
-const ip = require('ip'); 
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: "*", 
+        origin: "*",
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -27,44 +26,25 @@ io.on("connection", (socket) => {
         console.log(`✅ Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
     });
 
-    // 📌 Metin Mesajı Gönderme
-    socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl }) => {
-        const timestamp = new Date().toISOString(); 
-    
-        console.log(`📩 Mesaj Alındı -> Grup: ${groupId}, Mesaj: ${message}, Gönderen: ${senderId}, Profil Resmi: ${senderProfileImageUrl}`);
-    
+    // 📌 Tek bir `sendMessage` fonksiyonu ile hem metin hem de resimli mesajlar işleniyor
+    socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl }) => {
+        const timestamp = new Date().toISOString();
+
+        console.log(`📩 Yeni Mesaj Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Mesaj: ${message}, Resim: ${imageUrl}`);
+
         const messageData = {
-            message: message,
-            senderId: senderId,
-            senderName: senderName,
-            senderProfileImageUrl: senderProfileImageUrl,
-            groupId: groupId,
-            timestamp: timestamp
+            message: message || "",  // **🔥 Eğer mesaj boşsa "", null olmaması için**
+            senderId,
+            senderName,
+            senderProfileImageUrl,
+            groupId,
+            imageUrl: imageUrl || null,  // **🔥 Eğer resim yoksa null bırak**
+            timestamp
         };
 
-        io.to(groupId).emit("receiveMessage", messageData); 
-    
+        io.to(groupId).emit("receiveMessage", messageData); // **🔥 Tek event ile hem metin hem de resimli mesajlar gönderilecek**
+
         console.log(`✅ Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
-    });
-
-    // 📌 Fotoğraf Mesajı Gönderme
-    socket.on("sendImageMessage", ({ groupId, senderId, senderName, senderProfileImageUrl, imageUrl }) => {
-        const timestamp = new Date().toISOString(); 
-    
-        console.log(`📸 Fotoğraf Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Resim: ${imageUrl}`);
-    
-        const messageData = {
-            senderId: senderId,
-            senderName: senderName,
-            senderProfileImageUrl: senderProfileImageUrl,
-            groupId: groupId,
-            imageUrl: imageUrl, // 🔥 Resim URL'sini ekledik
-            timestamp: timestamp
-        };
-
-        io.to(groupId).emit("receiveImageMessage", messageData); 
-    
-        console.log(`✅ Fotoğraf mesajı yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
     });
 
     // 📌 Kullanıcı Bağlantıyı Kestiğinde
