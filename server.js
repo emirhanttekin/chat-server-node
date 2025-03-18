@@ -30,24 +30,30 @@ io.on("connection", (socket) => {
     // 📌 Metin Mesajı Gönderme
     socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl }) => {
         const timestamp = new Date().toISOString();
-
-        console.log(`📩 Yeni Mesaj Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Mesaj: ${message}, Resim: ${imageUrl}`);
-
+    
+        console.log(`📩 Yeni Mesaj Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Mesaj: ${message || "Yok"}, Resim: ${imageUrl || "Yok"}`);
+    
+        // Eğer mesaj ve resim ikisi de boşsa işlem iptal
+        if (!message && !imageUrl) {
+            console.log("❌ HATA: Hem mesaj hem de resim boş, mesaj gönderilmiyor!");
+            return;
+        }
+    
         const messageData = {
-            message: message || "",  // **🔥 Eğer mesaj boşsa "", null olmaması için**
+            message: message || "",  // 🔥 Eğer mesaj boşsa, boş string olarak set et
             senderId,
             senderName,
             senderProfileImageUrl,
             groupId,
-            imageUrl: imageUrl || null,  // **🔥 Eğer resim yoksa null bırak**
+            imageUrl: imageUrl || null,  // 🔥 Eğer resim yoksa, null olarak ayarla
             timestamp
         };
-
+    
         io.to(groupId).emit("receiveMessage", messageData); // **🔥 Tek event ile hem metin hem de resimli mesajlar gönderilecek**
-
+    
         console.log(`✅ Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
     });
-
+    
 
     // 📌 Kullanıcı Bağlantıyı Kestiğinde
     socket.on("disconnect", () => {
