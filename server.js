@@ -17,56 +17,69 @@ const io = socketIo(server, {
 
 let activeUsers = {};
 
-
 io.on("connection", (socket) => {
-    console.log(" Yeni kullanıcı bağlandı:", socket.id);
+    console.log("🟢 Yeni kullanıcı bağlandı:", socket.id);
 
-    
+    // 📌 Kullanıcı Gruba Katılıyor
     socket.on("joinGroup", ({ userId, groupId }) => {
         socket.join(groupId);
         activeUsers[userId] = { socketId: socket.id, groupId };
-        console.log(` Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
+        console.log(`✅ Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
     });
-    
 
-
-    socket.on("sendMessage", ({ groupId, message, senderId, senderProfileImageUrl }) => {
+    // 📌 Metin Mesajı Gönderme
+    socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl }) => {
         const timestamp = new Date().toISOString(); 
     
-        console.log(`Mesaj Alındı -> Grup: ${groupId}, Mesaj: ${message}, Gönderen: ${senderId}, Profil Resmi: ${senderProfileImageUrl}`);
-    
-        const roomClients = io.sockets.adapter.rooms.get(groupId);
-        console.log(` Grup ${groupId} içinde ${roomClients ? roomClients.size : 0} kullanıcı var.`);
+        console.log(`📩 Mesaj Alındı -> Grup: ${groupId}, Mesaj: ${message}, Gönderen: ${senderId}, Profil Resmi: ${senderProfileImageUrl}`);
     
         const messageData = {
             message: message,
             senderId: senderId,
-            senderProfileImageUrl: senderProfileImageUrl, // ✅ PROFİL RESMİ ARTIK DOĞRU ALINIYOR
+            senderName: senderName,
+            senderProfileImageUrl: senderProfileImageUrl,
             groupId: groupId,
             timestamp: timestamp
         };
-    
+
         io.to(groupId).emit("receiveMessage", messageData); 
     
         console.log(`✅ Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
     });
-    
-    
 
-  
+    // 📌 Fotoğraf Mesajı Gönderme
+    socket.on("sendImageMessage", ({ groupId, senderId, senderName, senderProfileImageUrl, imageUrl }) => {
+        const timestamp = new Date().toISOString(); 
+    
+        console.log(`📸 Fotoğraf Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Resim: ${imageUrl}`);
+    
+        const messageData = {
+            senderId: senderId,
+            senderName: senderName,
+            senderProfileImageUrl: senderProfileImageUrl,
+            groupId: groupId,
+            imageUrl: imageUrl, // 🔥 Resim URL'sini ekledik
+            timestamp: timestamp
+        };
+
+        io.to(groupId).emit("receiveImageMessage", messageData); 
+    
+        console.log(`✅ Fotoğraf mesajı yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
+    });
+
+    // 📌 Kullanıcı Bağlantıyı Kestiğinde
     socket.on("disconnect", () => {
         Object.keys(activeUsers).forEach(userId => {
             if (activeUsers[userId].socketId === socket.id) {
                 delete activeUsers[userId];
             }
         });
-        console.log(" Kullanıcı bağlantıyı kesti:", socket.id);
+        console.log("🔴 Kullanıcı bağlantıyı kesti:", socket.id);
     });
 });
 
-
+// 📌 Server Başlatılıyor
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () =>
-    console.log(` Server çalışıyor: Port ${PORT}`)
+    console.log(`🚀 Server çalışıyor: Port ${PORT}`)
 );
-
