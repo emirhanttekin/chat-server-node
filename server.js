@@ -3,12 +3,13 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
+const ip = require('ip'); 
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: "*",
+        origin: "*", 
         methods: ["GET", "POST"],
         credentials: true
     }
@@ -26,7 +27,7 @@ io.on("connection", (socket) => {
         console.log(`✅ Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
     });
 
-    // 📌 Tek bir `sendMessage` fonksiyonu ile hem metin hem de resimli mesajlar işleniyor
+    // 📌 Metin Mesajı Gönderme
     socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl }) => {
         const timestamp = new Date().toISOString();
 
@@ -46,6 +47,7 @@ io.on("connection", (socket) => {
 
         console.log(`✅ Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
     });
+
 
     // 📌 Kullanıcı Bağlantıyı Kestiğinde
     socket.on("disconnect", () => {
