@@ -27,7 +27,6 @@ io.on("connection", (socket) => {
         console.log(`✅ Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
     });
 
-    // 📌 Metin Mesajı Gönderme
     socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl }) => {
         const timestamp = new Date().toISOString();
     
@@ -40,7 +39,7 @@ io.on("connection", (socket) => {
         }
     
         const messageData = {
-            message: message || "",  // 🔥 Eğer mesaj boşsa, boş string olarak set et
+            message: message || null,  // 🔥 Eğer mesaj boşsa, null olarak kaydet
             senderId,
             senderName,
             senderProfileImageUrl,
@@ -49,10 +48,11 @@ io.on("connection", (socket) => {
             timestamp
         };
     
-        io.to(groupId).emit("receiveMessage", messageData); // **🔥 Tek event ile hem metin hem de resimli mesajlar gönderilecek**
+        io.to(groupId).emit("receiveMessage", messageData);
     
         console.log(`✅ Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
     });
+    
     
 
     // 📌 Kullanıcı Bağlantıyı Kestiğinde
