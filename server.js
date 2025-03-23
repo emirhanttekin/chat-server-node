@@ -20,54 +20,57 @@ let activeUsers = {};
 io.on("connection", (socket) => {
     console.log("🟢 Yeni kullanıcı bağlandı:", socket.id);
 
-    // 📌 Kullanıcı Gruba Katılıyor
+   
     socket.on("joinGroup", ({ userId, groupId }) => {
         socket.join(groupId);
         activeUsers[userId] = { socketId: socket.id, groupId };
         console.log(`✅ Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
     });
 
-    socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl }) => {
+    socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl, audioUrl }) => {
+
         const timestamp = new Date().toISOString();
     
-        console.log(`📩 Yeni Mesaj Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Mesaj: ${message || "Yok"}, Resim: ${imageUrl || "Yok"}`);
+        console.log(` Yeni Mesaj Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Mesaj: ${message || "Yok"}, Resim: ${imageUrl || "Yok"}`);
     
-        // Eğer mesaj ve resim ikisi de boşsa işlem iptal
-        if (!message && !imageUrl) {
-            console.log("❌ HATA: Hem mesaj hem de resim boş, mesaj gönderilmiyor!");
+   
+        if (!message && !imageUrl && !audioUrl) {
+            console.log(" HATA: Mesaj, resim ve ses boş, mesaj gönderilmiyor!");
             return;
         }
-    
+        
         const messageData = {
-            message: message || null,  // 🔥 Eğer mesaj boşsa, null olarak kaydet
+            message: message || null,
             senderId,
             senderName,
             senderProfileImageUrl,
             groupId,
-            imageUrl: imageUrl || null,  // 🔥 Eğer resim yoksa, null olarak ayarla
+            imageUrl: imageUrl || null,
+            audioUrl: audioUrl || null, // ✅ Sesli mesaj desteği
             timestamp
         };
+        
     
         io.to(groupId).emit("receiveMessage", messageData);
     
-        console.log(`✅ Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
+        console.log(` Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
     });
     
     
 
-    // 📌 Kullanıcı Bağlantıyı Kestiğinde
+  
     socket.on("disconnect", () => {
         Object.keys(activeUsers).forEach(userId => {
             if (activeUsers[userId].socketId === socket.id) {
                 delete activeUsers[userId];
             }
         });
-        console.log("🔴 Kullanıcı bağlantıyı kesti:", socket.id);
+        console.log(" Kullanıcı bağlantıyı kesti:", socket.id);
     });
 });
 
-// 📌 Server Başlatılıyor
+
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () =>
-    console.log(`🚀 Server çalışıyor: Port ${PORT}`)
+    console.log(` Server çalışıyor: Port ${PORT}`)
 );
