@@ -27,29 +27,26 @@ io.on("connection", (socket) => {
         console.log(`✅ Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
     });
 
-    socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl, audioUrl }) => {
-
+    socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl }) => {
         const timestamp = new Date().toISOString();
     
         console.log(` Yeni Mesaj Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Mesaj: ${message || "Yok"}, Resim: ${imageUrl || "Yok"}`);
     
    
-        if (!message && !imageUrl && !audioUrl) {
-            console.log(" HATA: Mesaj, resim ve ses boş, mesaj gönderilmiyor!");
+        if (!message && !imageUrl) {
+            console.log(" HATA: Hem mesaj hem de resim boş, mesaj gönderilmiyor!");
             return;
         }
-        
+    
         const messageData = {
-            message: message || null,
+            message: message || null,  
             senderId,
             senderName,
             senderProfileImageUrl,
             groupId,
-            imageUrl: imageUrl || null,
-            audioUrl: audioUrl || null, // ✅ Sesli mesaj desteği
+            imageUrl: imageUrl || null,  
             timestamp
         };
-        
     
         io.to(groupId).emit("receiveMessage", messageData);
     
