@@ -27,30 +27,30 @@ io.on("connection", (socket) => {
         console.log(`✅ Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
     });
 
-    socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl }) => {
+    socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl, audioUrl }) => {
         const timestamp = new Date().toISOString();
     
-        console.log(` Yeni Mesaj Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Mesaj: ${message || "Yok"}, Resim: ${imageUrl || "Yok"}`);
+        console.log(`Yeni Mesaj Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Mesaj: ${message || "Yok"}, Resim: ${imageUrl || "Yok"}, Ses: ${audioUrl || "Yok"}`);
     
-   
-        if (!message && !imageUrl) {
-            console.log(" HATA: Hem mesaj hem de resim boş, mesaj gönderilmiyor!");
+        if (!message && !imageUrl && !audioUrl) {
+            console.log("❌ HATA: Mesaj, resim ve sesin hepsi boş. Mesaj gönderilmiyor!");
             return;
         }
     
         const messageData = {
-            message: message || null,  
+            message: message || null,
             senderId,
             senderName,
             senderProfileImageUrl,
             groupId,
-            imageUrl: imageUrl || null,  
+            imageUrl: imageUrl || null,
+            audioUrl: audioUrl || null,
             timestamp
         };
     
         io.to(groupId).emit("receiveMessage", messageData);
     
-        console.log(` Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
+        console.log(`✅ Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
     });
     
     
