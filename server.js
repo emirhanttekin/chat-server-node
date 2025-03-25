@@ -27,13 +27,13 @@ io.on("connection", (socket) => {
         console.log(`✅ Kullanıcı ${userId}, ${groupId} grubuna katıldı`);
     });
 
-    socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl, audioUrl }) => {
+    socket.on("sendMessage", ({ groupId, message, senderId, senderName, senderProfileImageUrl, imageUrl, audioUrl, fileUrl }) => {
         const timestamp = new Date().toISOString();
     
-        console.log(`Yeni Mesaj Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Mesaj: ${message || "Yok"}, Resim: ${imageUrl || "Yok"}, Ses: ${audioUrl || "Yok"}`);
+        console.log(`Yeni Mesaj Alındı -> Grup: ${groupId}, Gönderen: ${senderId}, Mesaj: ${message || "Yok"}, Resim: ${imageUrl || "Yok"}, Ses: ${audioUrl || "Yok"}, Dosya: ${fileUrl || "Yok"}`);
     
-        if (!message && !imageUrl && !audioUrl) {
-            console.log("❌ HATA: Mesaj, resim ve sesin hepsi boş. Mesaj gönderilmiyor!");
+        if (!message && !imageUrl && !audioUrl && !fileUrl) {
+            console.log("❌ HATA: Mesaj, resim, ses ve dosya hepsi boş. Mesaj gönderilmiyor!");
             return;
         }
     
@@ -45,6 +45,7 @@ io.on("connection", (socket) => {
             groupId,
             imageUrl: imageUrl || null,
             audioUrl: audioUrl || null,
+            fileUrl: fileUrl || null, // ✅ Yeni eklendi
             timestamp
         };
     
@@ -52,6 +53,7 @@ io.on("connection", (socket) => {
     
         console.log(`✅ Mesaj yayınlandı: ${JSON.stringify(messageData)} -> Grup ${groupId}`);
     });
+    
     
     
 
